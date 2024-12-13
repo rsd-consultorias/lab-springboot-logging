@@ -13,6 +13,7 @@ import com.example.demo.dto.APISuccessResponse;
 import com.example.demo.infra.repositories.OrderRepository;
 import com.example.demo.infra.services.AmazonService;
 import com.example.demo.infra.services.BusinessLogService;
+import com.example.demo.infra.services.FraudService;
 
 @RestController
 @RequestMapping("/rest/order/v1")
@@ -20,8 +21,12 @@ public class OrderV1Controller {
 
     private final OrderService orderService;
 
-    public OrderV1Controller(OrderRepository orderRepository, AmazonService amazonService, BusinessLogService businessLogService) {
-        this.orderService = new OrderService(orderRepository, amazonService, businessLogService);
+    public OrderV1Controller(
+        OrderRepository orderRepository, 
+        AmazonService amazonService, 
+        BusinessLogService businessLogService,
+        FraudService fraudService) {
+        this.orderService = new OrderService(orderRepository, amazonService, businessLogService, fraudService);
     }
 
     @GetMapping

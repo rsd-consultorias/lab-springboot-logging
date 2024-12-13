@@ -9,13 +9,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.demo.core.interfaces.IAmazonService;
 import com.example.demo.core.interfaces.IBusinessLogService;
+import com.example.demo.core.interfaces.IFraudService;
 import com.example.demo.core.interfaces.IOrderRepository;
 import com.example.demo.core.model.Order;
 import com.example.demo.core.model.dto.CreateOrderDTO;
 import com.example.demo.core.service.OrderService;
 
 @SpringBootTest
-class DemoApplicationTests {
+class V1DemoApplicationTests {
+
+	private final String CPF_FRAUD = "12345678902";
+	private final String CPF_VALID = "12345678901";
+	private final String CPF_INVALID = "123456789";
 
 	@Test
 	void contextLoads() {
@@ -23,9 +28,10 @@ class DemoApplicationTests {
 
 	@Test
 	void createOrder_Success() {
-		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService());
+		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService(),
+				new FraudService());
 		var order = new CreateOrderDTO();
-		order.setCpf("12345678901");
+		order.setCpf(CPF_VALID);
 		order.setSku("123-456-789");
 
 		var response = orderService.createOrderV1(order);
@@ -34,9 +40,10 @@ class DemoApplicationTests {
 
 	@Test
 	void createOrder_InvalidCPF() {
-		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService());
+		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService(),
+				new FraudService());
 		var order = new CreateOrderDTO();
-		order.setCpf("1234567890");
+		order.setCpf(CPF_INVALID);
 		order.setSku("123-456-789");
 
 		var response = orderService.createOrderV1(order);
@@ -47,9 +54,10 @@ class DemoApplicationTests {
 
 	@Test
 	void createOrder_InvalidSKU() {
-		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService());
+		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService(),
+				new FraudService());
 		var order = new CreateOrderDTO();
-		order.setCpf("12345678901");
+		order.setCpf(CPF_VALID);
 		order.setSku("123-456");
 
 		var response = orderService.createOrderV1(order);
@@ -61,8 +69,8 @@ class DemoApplicationTests {
 	@Test
 	void findOpenOrderByCPFAndSKU() {
 		var repository = new OrderRepository();
-		assertNull(repository.findOpenOrderByCPFAndSKU("45678912312", "123-456-678"));
-		assertNotNull(repository.findOpenOrderByCPFAndSKU("35678912312", "123-456-678"));
+		assertNull(repository.findOpenOrderByCPFAndSKU(CPF_INVALID, "123-456-678"));
+		assertNotNull(repository.findOpenOrderByCPFAndSKU(CPF_VALID, "123-456-678"));
 	}
 
 	// =====================================================
@@ -70,7 +78,7 @@ class DemoApplicationTests {
 
 		@Override
 		public Order findOpenOrderByCPFAndSKU(String cpf, String sku) {
-			if ("45678912312".equals(cpf))
+			if (CPF_INVALID.equals(cpf))
 				return null;
 
 			return new Order();
@@ -100,5 +108,13 @@ class DemoApplicationTests {
 		public void error(String process, String step, String correlationId, String message) {
 		}
 
+	}
+
+	class FraudService implements IFraudService {
+
+		@Override
+		public Boolean isFraud(String cpf) {
+			return CPF_FRAUD.equals(cpf);
+		}
 	}
 }
