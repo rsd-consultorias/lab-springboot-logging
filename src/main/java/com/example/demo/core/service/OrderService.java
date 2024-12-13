@@ -35,8 +35,8 @@ public class OrderService {
         
         if (openOrder != null) {
             businessLogService.warn("ORDER", "Creation", createOrderDTO.getId().toString(),
-                    "Already exists an open order for CPF %s and SKU %s".formatted(createOrderDTO.getCpf(),
-                            createOrderDTO.getSku()));
+                    "Already exists an open order for CPF %s and SKU %s: %s".formatted(createOrderDTO.getCpf(),
+                            createOrderDTO.getSku(), openOrder.getId().toString()));
         }
 
         businessLogService.info("ORDER", "Creation", "%s".formatted(createOrderDTO.getId()),
