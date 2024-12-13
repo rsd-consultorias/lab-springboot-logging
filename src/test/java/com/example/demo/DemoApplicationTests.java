@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.demo.core.interfaces.IAmazonService;
 import com.example.demo.core.interfaces.IBusinessLogService;
+import com.example.demo.core.interfaces.IOrderRepository;
+import com.example.demo.core.model.Order;
 import com.example.demo.core.model.dto.CreateOrderDTO;
 import com.example.demo.core.service.OrderService;
 
@@ -19,7 +21,7 @@ class DemoApplicationTests {
 
 	@Test
 	void createOrder_Success() {
-		var orderService = new OrderService(new AmazonService(), new BusinessLogService());
+		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService());
 		var order = new CreateOrderDTO();
 		order.setCpf("12345678901");
 		order.setSku("123-456-789");
@@ -30,7 +32,7 @@ class DemoApplicationTests {
 
 	@Test
 	void createOrder_InvalidCPF() {
-		var orderService = new OrderService(new AmazonService(), new BusinessLogService());
+		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService());
 		var order = new CreateOrderDTO();
 		order.setCpf("1234567890");
 		order.setSku("123-456-789");
@@ -43,7 +45,7 @@ class DemoApplicationTests {
 
 	@Test
 	void createOrder_InvalidSKU() {
-		var orderService = new OrderService(new AmazonService(), new BusinessLogService());
+		var orderService = new OrderService(new OrderRepository(), new AmazonService(), new BusinessLogService());
 		var order = new CreateOrderDTO();
 		order.setCpf("12345678901");
 		order.setSku("123-456");
@@ -55,6 +57,18 @@ class DemoApplicationTests {
 	}
 
 	// =====================================================
+	class OrderRepository implements IOrderRepository {
+
+		@Override
+		public Order findOpenOrderByCPFAndSKU(String cpf, String sku) {
+			if ("45678912312".equals(cpf))
+				return null;
+
+			return new Order();
+		}
+
+	}
+
 	class AmazonService implements IAmazonService {
 
 		@Override

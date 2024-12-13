@@ -4,27 +4,45 @@ import java.util.UUID;
 
 import com.example.demo.core.interfaces.IAmazonService;
 import com.example.demo.core.interfaces.IBusinessLogService;
+import com.example.demo.core.interfaces.IOrderRepository;
 import com.example.demo.core.model.dto.CreateOrderDTO;
 import com.example.demo.core.model.dto.ServiceResponse;
 
 public class OrderService {
     private final IBusinessLogService businessLogService;
     private final IAmazonService amazonService;
+    private final IOrderRepository orderRepository;
 
-    public OrderService(IAmazonService amazonService, IBusinessLogService businessLogService) {
+    public OrderService(
+            IOrderRepository orderRepository,
+            IAmazonService amazonService,
+            IBusinessLogService businessLogService) {
+        this.orderRepository = orderRepository;
         this.amazonService = amazonService;
         this.businessLogService = businessLogService;
     }
 
     public ServiceResponse createOrderV1(CreateOrderDTO createOrderDTO) {
         createOrderDTO.setId(UUID.randomUUID());
-        
-        businessLogService.info("ORDER", "Creation", "%s".formatted(createOrderDTO.getId()), "Initializing order for CPF %s".formatted(createOrderDTO.getCpf()));
 
         businessLogService.info("ORDER", "Creation", "%s".formatted(createOrderDTO.getId()),
-        "Verifying CPF %s is valid".formatted(createOrderDTO.getCpf()));
+                "Initializing order for CPF %s".formatted(createOrderDTO.getCpf()));
 
-        if(createOrderDTO.getCpf().length() != 11) {
+        businessLogService.info("ORDER", "Creation", "%s".formatted(createOrderDTO.getId()),
+                "Verifying if exists Open Order for CPF %s and SKU %s".formatted(createOrderDTO.getCpf(),
+                        createOrderDTO.getSku()));
+        var openOrder = orderRepository.findOpenOrderByCPFAndSKU(createOrderDTO.getCpf(), createOrderDTO.getSku());
+        
+        if (openOrder != null) {
+            businessLogService.warn("ORDER", "Creation", createOrderDTO.getId().toString(),
+                    "Already exists an open order for CPF %s and SKU %s".formatted(createOrderDTO.getCpf(),
+                            createOrderDTO.getSku()));
+        }
+
+        businessLogService.info("ORDER", "Creation", "%s".formatted(createOrderDTO.getId()),
+                "Verifying CPF %s is valid".formatted(createOrderDTO.getCpf()));
+
+        if (createOrderDTO.getCpf().length() != 11) {
             businessLogService.error("ORDER", "Creation", "%s".formatted(createOrderDTO.getId()),
                     "CPF %s is invalid".formatted(createOrderDTO.getCpf()));
             return new ServiceResponse("INVALID_CPF", "Invalid CPF: %s".formatted(createOrderDTO.getCpf()));

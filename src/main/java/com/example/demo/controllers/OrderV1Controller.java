@@ -10,6 +10,7 @@ import com.example.demo.core.model.dto.CreateOrderDTO;
 import com.example.demo.core.service.OrderService;
 import com.example.demo.dto.APIBadRequestResponse;
 import com.example.demo.dto.APISuccessResponse;
+import com.example.demo.infra.repositories.OrderRepository;
 import com.example.demo.infra.services.AmazonService;
 import com.example.demo.infra.services.BusinessLogService;
 
@@ -19,8 +20,8 @@ public class OrderV1Controller {
 
     private final OrderService orderService;
 
-    public OrderV1Controller(AmazonService amazonService, BusinessLogService businessLogService) {
-        this.orderService = new OrderService(amazonService, businessLogService);
+    public OrderV1Controller(OrderRepository orderRepository, AmazonService amazonService, BusinessLogService businessLogService) {
+        this.orderService = new OrderService(orderRepository, amazonService, businessLogService);
     }
 
     @GetMapping
